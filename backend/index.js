@@ -3,15 +3,17 @@ const app=express();
 const z=require("zod");
 const { createTodo, updateTodo } = require("./types");
 const { todo } = require("./db");
+const cors=require("cors");
 
 app.use(express.json());
+app.use(cors());
 
 app.post("/todo",async function(req,res){
    const createPayLoad=req.body;
    const parsePayLoad=createTodo.safeParse(createPayLoad);
 
    if(!parsePayLoad.success){
-    res.status(411).json({
+    return res.status(400).json({
         msg:"you send the wrong input"
     })
    }
@@ -27,7 +29,7 @@ app.post("/todo",async function(req,res){
 
 
 app.get("/todos",async function(req,res){
-    const todos=await todo.findOne({});
+    const todos=await todo.find({});
 
     res.json({
         todos
@@ -39,12 +41,12 @@ app.put("/completed",async function(req,res){
     const updatePayLoad=req.body;
     const safePayLoad=updateTodo.safeParse(updatePayLoad);
     if(!safePayLoad.success){
-        res.status(411).json({
+        return res.status(411).json({
             msg:"invalid input"
         })
     }
     await todo.update({
-       _id: req.body.id 
+       _id: updatePayLoad.id 
     },{
         completed: true
     })
